@@ -87,7 +87,7 @@ $out .= '<div class="table-responsive">
 
 foreach ($support_versions as $version) {
     $out .= "\t\t<th>Moodle " . $version . "</th>";
-} 
+}
 $out .='</tr>
     </thead>
     <tbody>

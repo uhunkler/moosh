@@ -55,7 +55,7 @@ class CourseCreate extends MooshCommand
             }
             $course->visible = $visible;
             $course->category = $options['category'];
-            $course->summary = '';
+            $course->summary = $options['description'];
             $course->summaryformat = FORMAT_HTML;
             $course->startdate = time();
 
