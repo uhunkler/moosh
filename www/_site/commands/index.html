@@ -12,7 +12,7 @@
 
     <!-- Bootstrap core CSS -->
     <link href="/css/bootstrap-yeti.css" rel="stylesheet">
-    <link href="/css/boostrap-theme.css" rel="stylesheet">
+
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
     <style>
       body {
@@ -82,12 +82,37 @@
 
 <p>Adds an activity instance to the specified course. The activity is specified by it's component name
 without the plugin type prefix, so "forum", "assign" or "data" for example, and the course is specified
-by it's id.</p>
+by it's id.
+See <a href="https://moodle.org/mod/forum/discuss.php?d=368091">Moodle forum post</a> about using the options.</p>
+
+<p>Example 1. Add new assignment activity to course with id 2.</p>
 
 <pre><code>moosh activity-add assign 2
-moosh activity-add --section 3 forum 4
-moosh activity-add --name "General course forum" --section 2 forum 3
-moosh activity-add --name "Easy assignent" --section 2 --idnumber "ASD123" assign 2
+</code></pre>
+
+<p>Example 2. Add forum to section 3 of course 4.</p>
+
+<pre><code>moosh activity-add --section 3 forum 4
+</code></pre>
+
+<p>Example 3. Add lesson named "The first lesson" to course 2.</p>
+
+<pre><code>moosh activity-add --name "The first lesson" lesson 2
+</code></pre>
+
+<p>Example 4. Add assignment with name "Easy assignment" and idnumber "ASD123"</p>
+
+<pre><code>moosh activity-add --name "Easy assignment" --section 2 --idnumber "ASD123" assign 2
+</code></pre>
+
+<p>Example 5. Add quiz "more emails" with intro set to "polite orders", network address restriction set to  192.168.2.2</p>
+
+<pre><code>moosh activity-add -n 'more emails' -o="--intro=\"polite orders.\" --subnet=192.168.2.2" quiz 33
+</code></pre>
+
+<p>Example 6. Add scorm "scorm1" with description "my intro ABC" and forcenewattempt set to yes.</p>
+
+<pre><code>moosh activity-add -n scorm1 -o '--intro=my intro ABC --forcenewattempt=1' scorm 2    
 </code></pre>
 
 <p><span class="anchor" id="activity-delete"></span></p>
@@ -314,6 +339,12 @@ moosh block-manage show calendar
 <p>Example 2: Add category "mycat" under category id 6, set to visible and description to "My category".</p>
 
 <pre><code>moosh category-create -p 6 -v 1 -d "My category" mycat
+</code></pre>
+
+<p>Example 3: Create category only once. The second run of the command with "-r" will return the ID of the existing, matching category. The same category is defined as one having the same name, idnumber, parent and description. Also there must be exactly 1 match.</p>
+
+<pre><code>moosh category-create -r CategoryABC
+moosh category-create -r CategoryABC
 </code></pre>
 
 <p><span class="anchor" id="category-delete"></span></p>
@@ -584,6 +615,11 @@ it will only show which content could possibly be cleaned up.</p>
 <pre><code>moosh course-create --category 1 --fullname "full course name" --description "course description" --idnumber "course idnumber" shortname
 </code></pre>
 
+<p>Example 3: Create new course with section format, number options</p>
+
+<pre><code>moosh course-create --category 4 --format topics --numsections 2 test
+</code></pre>
+
 <p><span class="anchor" id="course-config-set"></span></p>
 
 <h2><a class="command-name">course-config-set</a></h2>
@@ -616,7 +652,7 @@ it will only show which content could possibly be cleaned up.</p>
 <h2><a class="command-name">course-enrol</a></h2>
 
 <p>Enrol user(s) into a course id provided. First argument is a course ID, then put one or more user names.
-Use -i for providing username IDs.</p>
+Use -i for providing username IDs.  Optionally add -S and -E to define start and end dates for the enrollment.</p>
 
 <p>Example 1: Enroll username1 and username2 into course ID 21 as students.</p>
 
@@ -626,6 +662,16 @@ Use -i for providing username IDs.</p>
 <p>Example 2: Enroll user with id 21 into the course with id 31 as a non-editing teacher.</p>
 
 <pre><code>moosh course-enrol -r teacher -i 31 21
+</code></pre>
+
+<p>Example 3: Enroll username3 into course ID 21 with start date of May 1st, 2018 10AM and end date May 31st, 2018 10AM</p>
+
+<pre><code>moosh course-enrol 21 username3 -S 2018-05-01T10:00:00 -E 2018-05-31T10:00:00
+</code></pre>
+
+<p>Example 4: Enroll username4 into course ID 21 with start date of May 1st, 2018 10AM and duration of 30 days.</p>
+
+<pre><code>moosh course-enrol 21 username3 -S 2018-05-01T10:00:00 -E 30
 </code></pre>
 
 <p><span class="anchor" id="course-enrolbyname"></span></p>
@@ -1264,6 +1310,39 @@ necessary.</p>
 <pre><code>moosh generate-ws newws
 </code></pre>
 
+<p><span class="anchor" id="gradecategory-create"></span></p>
+
+<h2><a class="command-name">gradecategory-create</a></h2>
+
+<p>Creates grade category.</p>
+
+<p>Example:</p>
+
+<pre><code>moosh gradecategory-create -n category-name -a aggregation parent_id course_id
+</code></pre>
+
+<p><span class="anchor" id="gradecategory-list"></span></p>
+
+<h2><a class="command-name">gradecategory-list</a></h2>
+
+<p>Lists grade categories, with command-line options, arguments modeled on course-list's.</p>
+
+<p>Example:</p>
+
+<pre><code>moosh gradecategory-list --hidden=yes --empty=yes --fields=id,parent,fullname courseid=26
+</code></pre>
+
+<p><span class="anchor" id="gradeitem-list"></span></p>
+
+<h2><a class="command-name">gradeitem-list</a></h2>
+
+<p>Lists grade items, with command-line options, arguments modeled on course-list's.</p>
+
+<p>Example:</p>
+
+<pre><code>moosh gradeitem-list --hidden=yes --locked=no --empty=yes --fields=id,categoryid,itemname courseid=26
+</code></pre>
+
 <p><span class="anchor" id="gradebook-import"></span></p>
 
 <h2><a class="command-name">gradebook-import</a></h2>
@@ -1286,6 +1365,71 @@ necessary.</p>
 <li>one or more columns matching grade item name</li>
 </ul>
 
+
+<p><span class="anchor" id="group-create"></span></p>
+
+<h2><a class="command-name">group-create</a></h2>
+
+<p>Create a new group.</p>
+
+<p>Example 1:</p>
+
+<pre><code>moosh group-create --description "group description" --key sesame --id "group idnumber" groupname courseid
+</code></pre>
+
+<p><span class="anchor" id="group-list"></span></p>
+
+<h2><a class="command-name">group-list</a></h2>
+
+<p>Lists groups in course, or grouping.</p>
+
+<p>Example 1:</p>
+
+<pre><code>moosh group-list courseid ...
+</code></pre>
+
+<p>Example 2:</p>
+
+<pre><code>moosh group-list --id -G groupingid courseid
+</code></pre>
+
+<p><span class="anchor" id="group-memberadd"></span></p>
+
+<h2><a class="command-name">group-memberadd</a></h2>
+
+<p>Add a member to a group.</p>
+
+<p>Example 1:</p>
+
+<pre><code>moosh group-memberadd -c courseid -g groupid membername1 [membername2] ...
+</code></pre>
+
+<p>Example 2:</p>
+
+<pre><code>moosh group-memberadd -g groupid memberid1 [memberid2] ...
+</code></pre>
+
+<p><span class="anchor" id="grouping-create"></span></p>
+
+<h2><a class="command-name">grouping-create</a></h2>
+
+<p>Create a new grouping.</p>
+
+<p>Example:</p>
+
+<pre><code>moosh grouping-create --description "grouping description" --id "grouping idnumber" groupingname courseid
+</code></pre>
+
+<p><span class="anchor" id="group-assigngrouping"></span></p>
+
+<h2><a class="command-name">group-assigngrouping</a></h2>
+
+<p>Add a group to a grouping.</p>
+
+<p>Example:</p>
+
+<pre><code>moosh group-assigngrouping -G groupingid groupid1 [groupid2] ...
+</code></pre>
 
 <p><span class="anchor" id="info"></span></p>
 
@@ -1610,7 +1754,7 @@ Image filename can be mapped to user ID, idnumber or username database field. Su
 
 <p>Example 6: change admin's password while ignoring password's policy</p>
 
-<pre><code>moosh user-mod --password weakpassword admin
+<pre><code>moosh user-mod --ignorepolicy --password weakpassword admin
 </code></pre>
 
 <p><span class="anchor" id="random-label"></span></p>
@@ -1792,7 +1936,7 @@ and add "-on" or "-off" to the caontext level name to turn it on or off.</p>
         </div>
 
         <div class="col-md-3">
-          <div class="bs-sidebar hidden-print" data-spy="affix">
+          <div class="bs-sidebar hidden-print">
             <ul class="nav bs-sidenav accordion">
             <li></li>
                 <p>Moodle development book:</p>
@@ -1816,7 +1960,7 @@ and add "-on" or "-off" to the caontext level name to turn it on or off.</p>
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
-    </script>
+
   </body>
 </html>
 

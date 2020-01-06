@@ -7,16 +7,37 @@ Commands
 ========
 <span class="anchor" id="activity-add"></span>
 <a class="command-name">activity-add</a>
-------------
+--------
 
 Adds an activity instance to the specified course. The activity is specified by it's component name
 without the plugin type prefix, so "forum", "assign" or "data" for example, and the course is specified
 by it's id.
+See [Moodle forum post](https://moodle.org/mod/forum/discuss.php?d=368091) about using the options. 
+
+Example 1. Add new assignment activity to course with id 2.
 
     moosh activity-add assign 2
+
+Example 2. Add forum to section 3 of course 4.
+
     moosh activity-add --section 3 forum 4
-    moosh activity-add --name "General course forum" --section 2 forum 3
-    moosh activity-add --name "Easy assignent" --section 2 --idnumber "ASD123" assign 2
+    
+Example 3. Add lesson named "The first lesson" to course 2.
+
+    moosh activity-add --name "The first lesson" lesson 2
+    
+Example 4. Add assignment with name "Easy assignment" and idnumber "ASD123"
+
+    moosh activity-add --name "Easy assignment" --section 2 --idnumber "ASD123" assign 2
+    
+Example 5. Add quiz "more emails" with intro set to "polite orders", network address restriction set to  192.168.2.2
+
+    moosh activity-add -n 'more emails' -o="--intro=\"polite orders.\" --subnet=192.168.2.2" quiz 33
+    
+Example 6. Add scorm "scorm1" with description "my intro ABC" and forcenewattempt set to yes.
+
+    moosh activity-add -n scorm1 -o '--intro=my intro ABC --forcenewattempt=1' scorm 2    
+
 
 <span class="anchor" id="activity-delete"></span>
 <a class="command-name">activity-delete</a>
@@ -231,6 +252,11 @@ Example 1: Add new top level category "mycat", invisible with no description.
 Example 2: Add category "mycat" under category id 6, set to visible and description to "My category".
 
     moosh category-create -p 6 -v 1 -d "My category" mycat
+
+Example 3: Create category only once. The second run of the command with "-r" will return the ID of the existing, matching category. The same category is defined as one having the same name, idnumber, parent and description. Also there must be exactly 1 match.
+
+    moosh category-create -r CategoryABC
+    moosh category-create -r CategoryABC
 
 
 <span class="anchor" id="category-delete"></span>
@@ -511,7 +537,7 @@ Example 1: delete courses id 2,3 and 4.
 ------------
 
 Enrol user(s) into a course id provided. First argument is a course ID, then put one or more user names.
-Use -i for providing username IDs.
+Use -i for providing username IDs.  Optionally add -S and -E to define start and end dates for the enrollment.
 
 Example 1: Enroll username1 and username2 into course ID 21 as students.
 
@@ -521,6 +547,14 @@ Example 2: Enroll user with id 21 into the course with id 31 as a non-editing te
 
     moosh course-enrol -r teacher -i 31 21
 
+Example 3: Enroll username3 into course ID 21 with start date of May 1st, 2018 10AM and end date May 31st, 2018 10AM
+
+    moosh course-enrol 21 username3 -S 2018-05-01T10:00:00 -E 2018-05-31T10:00:00
+	
+Example 4: Enroll username4 into course ID 21 with start date of May 1st, 2018 10AM and duration of 30 days.
+
+    moosh course-enrol 21 username3 -S 2018-05-01T10:00:00 -E 30
+	
 <span class="anchor" id="course-enrolbyname"></span>
 <a class="command-name">course-enrolbyname</a>
 ------------------
@@ -1099,6 +1133,66 @@ Creates new local plugin for WS development based on moodlehq/moodle-local_wstem
     moosh generate-ws newws
 
 
+<span class="anchor" id="gradecategory-create"></span>
+<a class="command-name">gradecategory-create</a>
+---------------
+
+Creates grade category.
+
+Example:
+
+    moosh gradecategory-create -n category-name -a aggregation parent_id course_id
+
+<span class="anchor" id="gradecategory-list"></span>
+<a class="command-name">gradecategory-list</a>
+---------------
+
+Lists grade categories, with command-line options, arguments modeled on course-list's.
+
+Example:
+
+    moosh gradecategory-list --hidden=yes --empty=yes --fields=id,parent,fullname courseid=26
+
+<span class="anchor" id="gradeitem-create"></span>
+<a class="command-name">gradeitem-create</a>
+---------------
+
+Creates grade items, with command-line options and courseid, gradecategoryid arguments.
+
+Example:
+
+    moosh gradeitem-create --itemname=Boost --grademax=3 --calculation='=max(3, ##gi5075##)' -o '--aggregationcoef=1' 37 527
+
+<span class="anchor" id="gradeitem-list"></span>
+<a class="command-name">gradeitem-list</a>
+---------------
+
+Lists grade items, with command-line options, arguments modeled on course-list's.
+
+Example:
+
+    moosh gradeitem-list --hidden=yes --locked=no --empty=yes --fields=id,categoryid,itemname courseid=26
+
+<span class="anchor" id="gradebook-export"></span>
+<a class="command-name">gradebook-export</a>
+---------------
+
+Exports gradebook grades for grade item(s) (comma-separated if more than 1) in specified course.
+
+Example:
+
+    moosh gradebook-export -g 0 -x 1 -a 1 -d 2 -p 0 -s comma -f txt 4755,4756 40 > grades.csv
+
+Options and defaults:
+
+* 'group id': 0
+* 'exportfeedback': 0
+* 'onlyactive': 1
+* 'displaytype (real=1, percentage=2, letter=3)': 1
+* 'decimalpoints': 2
+* 'separator (tab, comma)': comma
+* 'export format: (ods, txt, xls, xml)': txt
+
 <span class="anchor" id="gradebook-import"></span>
 <a class="command-name">gradebook-import</a>
 ---------------
@@ -1117,6 +1211,66 @@ Possible column headers to us:
 * "ID number" user's ID number (idnumber)
 * "email" user's email
 * one or more columns matching grade item name
+
+
+<span class="anchor" id="group-create"></span>
+<a class="command-name">group-create</a>
+-------------
+
+Create a new group.
+
+Example 1:
+
+    moosh group-create --description "group description" --key sesame --id "group idnumber" groupname courseid
+
+<span class="anchor" id="group-list"></span>
+<a class="command-name">group-list</a>
+-------------
+
+Lists groups in course, or grouping.
+
+Example 1:
+
+    moosh group-list courseid ...
+
+Example 2:
+
+    moosh group-list --id -G groupingid courseid
+
+<span class="anchor" id="group-memberadd"></span>
+<a class="command-name">group-memberadd</a>
+-------------
+
+Add a member to a group.
+
+Example 1:
+
+    moosh group-memberadd -c courseid -g groupid membername1 [membername2] ...
+
+Example 2:
+
+    moosh group-memberadd -g groupid memberid1 [memberid2] ...
+
+
+<span class="anchor" id="grouping-create"></span>
+<a class="command-name">grouping-create</a>
+-------------
+
+Create a new grouping.
+
+Example:
+
+    moosh grouping-create --description "grouping description" --id "grouping idnumber" groupingname courseid
+
+<span class="anchor" id="group-assigngrouping"></span>
+<a class="command-name">group-assigngrouping</a>
+-------------
+
+Add a group to a grouping.
+
+Example:
+
+    moosh group-assigngrouping -G groupingid groupid1 [groupid2] ...
 
 <span class="anchor" id="info"></span>
 <a class="command-name">info</a>
@@ -1225,11 +1379,15 @@ Example:
 <a class="command-name">plugin-install</a>
 ----------------
 
-Download and install plugin. Requires plugin short name, and plugin version. You can obtain those data by using `plugin-list -v' command.
+Download and install plugin. Requires plugin short name, and optional version. You can obtain those data by using `plugin-list -v' command.
 
-Example:
+Example 1: install a specific version
 
-    moosh plugin-install mod_quickmail 20160101
+    moosh plugin-install --release 20160101 mod_quickmail
+
+Example 2: install the latest release supported by current moodle version
+
+    moosh plugin-install block_checklist
 
 
 <span class="anchor" id="plugin-list"></span>
@@ -1411,7 +1569,7 @@ Example 5: set user as global super user
     
 Example 6: change admin's password while ignoring password's policy
 
-    moosh user-mod --password weakpassword admin
+    moosh user-mod --ignorepolicy --password weakpassword admin
      
 <span class="anchor" id="random-label"></span>
 <a class="command-name">random-label</a>
