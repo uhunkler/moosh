@@ -7,7 +7,7 @@ Commands
 ========
 
 activity-add
---------
+------------
 
 Adds an activity instance to the specified course. The activity is specified by it's component name
 without the plugin type prefix, so "forum", "assign" or "data" for example, and the course is specified
@@ -40,9 +40,7 @@ Example 6. Add scorm "scorm1" with description "my intro ABC" and forcenewattemp
 
 Example 7. Add quiz named "moosh test quiz" with intro set to "Here is your quiz", and activity completion options enabled to course 33
 
-    moosh activity-add 'moosh test quiz' -o="--intro=\"Here is your quiz.\  --completion=2 --completionview=1 --complet
-ionusegrade=1 --completionpass=1" quiz 33
-
+    moosh activity-add -n 'moosh test quiz' -o="--intro=Here is your quiz.  --completion=2 --completionview=1 --completionusegrade=1 --completionpass=1" quiz 33
 
 activity-delete
 ---------------
@@ -53,7 +51,7 @@ Deletes activity with given module id.
 
 
 activity-config-set
----------------
+-------------------
 
 Follows the course-config-set pattern, updating a field in the Moodle {$module} table, (NOT {course_modules} table!), for a single activity of a given module type, or for all activities of that type (or only those in one section (optional)) in a course.
 
@@ -71,7 +69,7 @@ Example 3: set reviewrightanswer to "After quiz closes" for quizzes in section n
 
 
 activity-move
----------------
+-------------
 
 Moves activity with module id in the first argument to the end of its present section (if alone), to the end of the section in the \-\-section number (not id) option (if given), and before the activity with the module id in the second, optional argument (which is not respected if it conflicts with the section number option).
 
@@ -79,7 +77,7 @@ Moves activity with module id in the first argument to the end of its present se
 
 
 admin-login
----------------
+-----------
 
 Create a session (login) for admin user. Command returns session cookie name & value.
 
@@ -87,7 +85,7 @@ Create a session (login) for admin user. Command returns session cookie name & v
 
 
 apache-parse-extendedlog
----------------
+------------------------
 
 Parse Apache log that was configured to capture extra Moodle & timings information. To configure it for your Apache server:
  
@@ -105,17 +103,17 @@ You can then parse resulting moodle.log file with moosh:
 
 
 apache-parse-missing-files
----------------
+--------------------------
 
-Looks for missing files in apache log when moodle files are accessed and reports them
+Looks through apache access log for potentially missing files.
 
-Example 1. Parse file `apache.log` and search for missing files
+Example 1. Parse file `apache.log` and search for missing files.
 
     moosh apache-parse-missing-files apache.log
 
 
 apache-parse-perflog
----------------
+--------------------
 
 Parse log file, and construct query with performance log.
 
@@ -197,7 +195,7 @@ Example 2. Check if user with id 17 has a weak password.
 
 
 auth-list
----------------
+---------
 
 List authentication plugins.
 
@@ -207,7 +205,7 @@ Example 1. List enabled authentication plugins.
 
 
 auth-manage
----------------
+-----------
 
 Allows to manage auth plugins. Disable, enable, moving up and down in order.
 
@@ -219,8 +217,36 @@ Example 2. Move up Email-based self-registration (email).
 
     moosh auth-manage up email 
 
+backup-info
+-----------
+
+Provides some basic information about Moodle backup file.
+The command works by extracting files like users.xml, gradebook.xml, course/logs.xml and getting the information from them 
+
+Example 1. Display basic stats about backup-moodle2-course-2-course1-20200405-1947.mbz file.
+
+    moosh backup-info backup-moodle2-course-2-course1-20200405-1947.mbz
+
+base-path
+---------
+
+For a given path/file inside Moodle plugin, the command returns initial directories that are a base directory for that plugin.
+The path can be provided as a single argument or read from standard input. 
+
+Example 1. Displays mod/choice.
+
+    moosh base-path mod/choice/index.php
+
+Example 2. Displays theme/boost.
+
+    moosh base-path theme/boost/pix/mod/quiz/whitecircle.png
+
+Example 3. Like above but using stdin.
+
+    echo theme/boost/pix/mod/quiz/whitecircle.png | moosh base-path
+
 block-add
----------------
+---------
 
 Add a new block instance to any system context (front page, category, course, module ...)
 Can add a block instance to a single course or to all courses in a category
@@ -235,7 +261,7 @@ Example:
     moosh block-add course 32 calendar_month course-view-* side-post 0
 
 block-manage
-----------------
+------------
 
 Show or Hide blocks, system wide (Will also delete, in the future)
 
@@ -254,7 +280,7 @@ The same as "purge all caches" page.
 
 
 cache-course-rebuild
------------
+--------------------
 
 Rebuild course cache.
 
@@ -267,7 +293,7 @@ Example 2: Rebuild cache for all the courses.
     moosh cache-course-rebuild -a
 
 category-config-set
----------------
+-------------------
 
 Set category configuration. Arguments are: categoryid setting value. The setting should match one of the columns from mdl_course_categories table.
 
@@ -310,7 +336,7 @@ Example 1: Delete recursively category with id=2
 
 
 category-export
--------------
+---------------
 
 Export category structure to XML starting from given category ID. Give 0 to export all categories.
 
@@ -323,7 +349,7 @@ Example 2: Export category with id 3 and all its sub categiries.
     moosh category-export 3
 
 category-import
--------------
+---------------
 
 Imports category structure from XML.
 
@@ -346,7 +372,7 @@ Example 2: List all categories with name "test" OR "foobar"
     moosh category-list test foobar
 
 category-move
----------------
+-------------
 
 Move one category to another category
 
@@ -357,6 +383,25 @@ Example 1: Move the category with id 5 to be in the category with id 7
 Example 2: Make the category with id 3 a top-level category
 
     moosh category-move 3 0
+
+category-resortcourses
+----------------------
+
+Sort courses and/or categories by fullname, shortname or idnumber.
+
+
+Example 1: Sort courses in category id 1 by idnumber. 
+
+    moosh category-resortcourses 1 idnumber
+
+Example 2: Sort courses and categories by shortname in category id 1 and all sub-categories below. 
+
+    moosh category-resortcourses -r 1 shortname
+    
+Example 3: Sort courses by fullname in category id 1 and all sub-categories below. Do not change the ordering of categories. 
+
+    moosh category-resortcourses -n -r 1 fullname
+
 
 chkdatadir
 ----------
@@ -370,9 +415,9 @@ Example:
 
 
 code-check
------------
+----------
 
-Checks files if they are compatible with moodle code standards
+Run Moodle code checker against the files.
 
 Example 1:
 
@@ -479,7 +524,7 @@ Example 2: Backup course id=3 and save it as /tmp/mybackup.mbz:
 
 
 course-cleanup
--------------
+--------------
 
 The command will to though various pieces of HTML texts contained in the given course and run purify_html() function on them. The command does not actually do any changes - 
 it will only show which content could possibly be cleaned up.
@@ -522,7 +567,7 @@ Example 3: Create new course with section format, number options
 
 
 course-delete
------------------
+-------------
 
 Delete course(s) with ID(s) given as argument(s).
 
@@ -584,9 +629,23 @@ Example 2: Enable self enrolment on a course with an enrolment key
 
     moosh course-enableselfenrol --key "an example enrolment key" 3
 
+course-info
+-----------
+
+Shows basic information about given course ID.
+This command will also clear course cache, to measure how much time the cache rebuild takes.
+
+Example 1: Show statistics for course ID 2.
+
+    moosh course-info 2  
+
+Example 2: Show statistics for course ID 2 - display in CSV format.
+
+    moosh course-info -c 2  
+
 
 course-list
-----------------------
+-----------
 
 Lists courses that match your search criteria. As an argument you can provide an SQL fragment, 
 that is simply injected after WHERE clause when searching for courses.
@@ -608,7 +667,7 @@ Example 3: List only empty courses from category 1
     moosh course-list -c 1 -e yes
 
 course-reset
---------------
+------------
 
 Reset course by ID. With -s or --settings option you can provide any supported setting for the restore. The value for
  -s option is a string with each setting in format key=value separated by space. This means you'll need to quote this
@@ -696,8 +755,16 @@ Example 2: Restore backup.mbz into existing course with id=3
 
     moosh course-restore -e backup.mbz 3
 
+Example 3: Ignore pre-check warnings, like restoring backup from higher Moodle version.
+
+    moosh course-restore --ignore-warnings backup.mbz 1
+
+Example 4: Restore backup.mbz into existing course with id=3, overwrite course content.
+
+    moosh course-restore --overwrite backup.mbz 3
+
 course-unenrol
-------------
+--------------
 
 Unerol user(s) from a course id provided. First argument is a course ID then list of users.
 
@@ -710,10 +777,25 @@ Example 1: Unenrol users with id 7, 9, 12 and 16 from course with id 2.
 data-stats
 ----------
 
-Provides information on size of dataroot directory, dataroot/filedir subdirectory and total size of non-external files in moodle. Outpus data in json format when run using --json option.
+Provides information on size of dataroot directory, dataroot/filedir subdirectory and total size of non-external files in Moodle.
+Outputs data in json format when run using --json option.
 
     moosh data-stats
 
+db-stats
+--------
+
+Shows the total size of the Moodle database and the biggest tables.
+With -H or -j options the sizes will be shown in bytes (ie "286720" instead of "280KB").
+
+Example 1: Show me basic database statistics, formatted for human consumption. 
+
+    moosh db-stats
+
+Example 2: Database statistics in JSON format. 
+
+    moosh db-stats -j
+    
 debug-off
 ---------
 
@@ -727,6 +809,32 @@ debug-on
 Turns on full debug - all the options in debugging section of the settings plus enables theme designer mode.
 
     moosh debug-on
+
+delete-missingplugins
+---------------------
+
+Uninstalls all plugins that are "missing" (PLUGIN_STATUS_MISSING) - meaning there is no source code for them.
+Running this command will delete database tables - destroying any data that may have been stored in plugin. 
+
+    moosh delete-missingplugins
+
+dev-langusage
+-------------
+
+The command parses PHP file given as an argument. If the argument points to directory, 
+then all the .php files inside it ae parsed.
+A parser will look for the use of language strings, that is calls to get_string(), print_string(), string_for_js().
+It then checks if the string is known by the string_manager - that is, if the sting is listed in the lang file.
+With -l / --lang flag you may include and check against any lang file.
+
+Example 1: Check if strings used in mod/book exist in the lang file. 
+Show only the ones missing (if any).  
+
+    moosh dev-langusage mod/book | grep missing
+
+Example 2: Check if "mod_book" component strings used in mod/book are defined in the lang file. 
+
+    moosh dev-langusage -c mod_book mod/book
 
 dev-versionbump
 ---------------
@@ -753,7 +861,7 @@ Example 2: Download latest Moodle 2.3.
 
 
 event-fire
------------
+----------
 
 Fire an event. Provide event name and JSON encoded data.
 
@@ -761,15 +869,31 @@ Fire an event. Provide event name and JSON encoded data.
 
 
 event-list
------------
+----------
 
 List all events available in current Moodle installation.
 
     moosh event-list
 
+file-check
+------------
+
+For each file entry in the database, check that the file exists in moodledata (in filedir).
+With --stop <number> stop the search after number of missing files found. 
+
+Example:
+
+    moosh file-check -s 1
+    
+Result:
+
+    Missing /opt/data/filedir/5f/8e/5f8e911d0da441e36f47c5c46f4393269211ca56
+    assignfeedback_editpdf / stamps "smile.png" 2019-08-25 15:43 / 2019-08-25 15:43
+    Found 1 missing files, not searching anymore. Set -s 0 option to disable the limit.
+
 
 file-datacheck
------------
+--------------
 
 Go through all files in Moodle data and check them for corruption. The check is to compare file's SHA to their file names.
 
@@ -777,9 +901,10 @@ Go through all files in Moodle data and check them for corruption. The check is 
 
 
 file-dbcheck
------------
+------------
 
-Check that all files recorder in the DB do exist in Moodle data directory.
+For each file in moodledata, check that there is an entry in the Moodle DB.
+This command will find any extra files in "filedir".
 
     moosh file-dbcheck
 
@@ -806,6 +931,22 @@ Example 4: Remove all automated backups and reclaim the space
 
     moosh file-list -i 'component="backup" AND filearea="automated"' | moosh file-delete -s
     moosh file-delete --flush
+
+file-hash-delete
+----------------
+
+Delete files that match given hash from the dababase (mdl_files).
+
+Example:
+
+    moosh file-hash-delete 5f8e911d0da441e36f47c5c46f4393269211ca56
+    
+Resuls:
+
+    There is: 1 results of this hash. 
+    Successfully deleted files.
+    File ID: 1, contenthash: 5f8e911d0da441e36f47c5c46f4393269211ca56, itemid: 0, component: assignfeedback_editpdf, filearea: stamps, filename: smile.png
+
 
 file-list
 ---------
@@ -865,7 +1006,7 @@ Example 3: Like above but with no duplicates and show path relative to data root
     moosh file-list -r -i 'id>100 AND id<200' | moosh file-path -s | sort | uniq
 
 file-upload
---------
+-----------
 
 Upload selected file to Moodle data. Must specify full path to filename.
 
@@ -888,7 +1029,7 @@ place in directory "drop".
     moosh file-upload --filepath=drop --filename=myfile.txt file.txt 
 
 filter-set
---------
+---------
 
 Enable/disable global filter, equivalent to admin/filters.php settings page. First argument is a filter name without filter_ prefix.
 Second argument is a state, use On = 1 , Off/but available per course = -1 , Off = -9999 .
@@ -929,7 +1070,7 @@ Example:
 
 
 generate-availability
--------------
+---------------------
 
 Generate a code for new availability condition based on danielneis/moodle-availability_newavailability.
 
@@ -937,7 +1078,7 @@ Generate a code for new availability condition based on danielneis/moodle-availa
 
 
 generate-block
--------------
+--------------
 
 Generate a code for new block based on the template.
 
@@ -947,7 +1088,7 @@ Example: generate new block_abc
 
 
 generate-cfg
--------------
+------------
 
 Generate fake class to get auto-completion for $CFG object. Properties genertated extracted from the current source code.
  See [setup instructions](http://moosh-online.com/#cfg-auto-completion).
@@ -955,7 +1096,7 @@ Generate fake class to get auto-completion for $CFG object. Properties genertate
     moosh generate-cfg > config.class.php
 
 generate-enrol
--------------
+--------------
 
 Creates new local plugin under enrol/ based on template from https://github.com/danielneis/moodle-enrol_newenrol
 
@@ -966,7 +1107,7 @@ Example 1: Generate new plugin under enrol/mynewenrol
     moosh generate-local mynewenrol
 
 generate-filemanager
--------------------
+--------------------
 
 Shows how to code filepicker, based on https://github.com/AndyNormore/filemanager. Takes no arguments.
 
@@ -988,7 +1129,7 @@ class. It will also display a boilerplate code on how can you use the form.
     moosh generate-form edit
 
 generate-gradereport
---------------
+--------------------
 
 Creates new grade report under grade/report based on the template from https://github.com/danielneis/moodle-gradereport_newgradereport.
 
@@ -999,7 +1140,7 @@ Example: Create new report under grade/report/beststudents
     moosh generate-gradereport beststudents
 
 generate-gradeexport
---------------
+--------------------
 
 Creates new grade export under grade/export based on the template from https://github.com/danielneis/moodle-gradeexport_newgradeexport.
 
@@ -1022,7 +1163,7 @@ Example 1: Extract lang strings from edit_form.php.
     moosh generate-lang edit_form.php
 
 generate-local
--------------
+--------------
 
 Creates new local plugin under local/ based on template from https://github.com/danielneis/moodle-local_newlocal
 
@@ -1034,7 +1175,7 @@ Example 1: Generate new plugin under local/mynewlocal
 
 
 generate-messageoutput
----------------
+----------------------
 
 Creates new message output processor under message/output based on the template from https://github.com/danielneis/moodle-message_newprocessor.
 
@@ -1057,7 +1198,7 @@ Example: Create new module under mod/flashcard
 
 
 generate-moosh
----------------
+--------------
 
 Use moosh to create new moosh command.
 
@@ -1077,7 +1218,7 @@ Example: Create new module under question/type/myqtype
 
 
 generate-userprofilefield
---------------
+-------------------------
 
 Creates new profile field based on a template.
 
@@ -1085,7 +1226,7 @@ Creates new profile field based on a template.
 
 
 generate-ws
---------------
+-----------
 
 Creates new local plugin for WS development based on moodlehq/moodle-local_wstemplate.
 
@@ -1093,7 +1234,7 @@ Creates new local plugin for WS development based on moodlehq/moodle-local_wstem
 
 
 gradebook-import
----------------
+----------------
 
 Imports gradebook grades from csv file into a course given by id. With --course-idnumber use take mdl_course.idnumber instead of course.id.
 --map-users-by will change what to use for mapping users from CSV (email or idnumber).
@@ -1112,7 +1253,7 @@ Possible column headers to us:
 
 
 gradecategory-create
----------------
+--------------------
 
 Creates grade category.
 
@@ -1121,7 +1262,7 @@ Example:
     moosh gradecategory-create -n category-name -a aggregation parent_id course_id
 
 gradecategory-list
----------------
+------------------
 
 Lists grade categories, with command-line options, arguments modeled on course-list's.
 
@@ -1130,7 +1271,7 @@ Example:
     moosh gradecategory-list --hidden=yes --empty=yes --fields=id,parent,fullname courseid=26
 
 gradeitem-create
----------------
+----------------
 
 Creates grade items, with command-line options and courseid, gradecategoryid arguments.
 
@@ -1139,7 +1280,7 @@ Example:
     moosh gradeitem-create --itemname=Boost --grademax=3 --calculation='=max(3, ##gi5075##)' -o '--aggregationcoef=1' 37 527
 
 gradeitem-list
----------------
+--------------
 
 Lists grade items, with command-line options, arguments modeled on course-list's.
 
@@ -1148,7 +1289,7 @@ Example:
     moosh gradeitem-list --hidden=yes --locked=no --empty=yes --fields=id,categoryid,itemname courseid=26
 
 gradebook-export
----------------
+----------------
 
 Exports gradebook grades for grade item(s) (comma-separated if more than 1) in specified course.
 
@@ -1167,7 +1308,7 @@ Options and defaults:
 * 'export format: (ods, txt, xls, xml)': txt
 
 group-create
--------------
+------------
 
 Create a new group.
 
@@ -1176,7 +1317,7 @@ Example 1:
     moosh group-create --description "group description" --key sesame --id "group idnumber" groupname courseid
 
 group-list
--------------
+----------
 
 Lists groups in course, or grouping.
 
@@ -1189,7 +1330,7 @@ Example 2:
     moosh group-list --id -G groupingid courseid
 
 group-memberadd
--------------
+---------------
 
 Add a member to a group.
 
@@ -1203,7 +1344,7 @@ Example 2:
 
 
 grouping-create
--------------
+---------------
 
 Create a new grouping.
 
@@ -1212,7 +1353,7 @@ Example:
     moosh grouping-create --description "grouping description" --id "grouping idnumber" groupingname courseid
 
 group-assigngrouping
--------------
+--------------------
 
 Add a group to a grouping.
 
@@ -1221,7 +1362,7 @@ Example:
     moosh group-assigngrouping -G groupingid groupid1 [groupid2] ...
 
 info
----------------
+----
 
 Show information about plugin in current directory.
 
@@ -1229,8 +1370,18 @@ Example 1:
 
     moosh info
 
+info-context
+------------
+
+Show information about given context ID - as in mdl_context.id.
+
+Example 1: Show information about Moodle context 123.
+
+    moosh info-context 123
+
+
 info-plugins
----------------
+------------
 
 List all possible plugins in this version of Moodle and directory for each.
 
@@ -1238,8 +1389,33 @@ Example 1: Show all plugin types.
 
     moosh info-plugins
 
+lang-compare
+------------
+
+Compare 2 Moodle language files and lists the difference in strings (keys) between them.
+It does not compare the translations (values).
+
+Example: 
+
+    moosh.php lang-compare book.php book2.php
+    
+Result:
+
+    Comparing book.php and book2.php. Summary:
+    Number of strings in book.php: 72
+    Number of strings in book2.php: 72
+    Number of strings missing in book2.php: 1
+    Number of strings missing in book.php: 1
+
+    List of language strings that exist in book.php but are not present in book2.php
+    pluginname
+
+    List of language strings that exist in book2.php but are not present in book.php
+    pluginname2
+
+
 languages-update
----------------
+----------------
 
 Update all installed language packs, in the current Moodle folder.
 
@@ -1266,7 +1442,7 @@ A maintenance message can also be set:
     moosh maintenace-on -m "Example message"
 
 module-config
-----------------
+-------------
 
 Set or Get any plugin's settings values
 
@@ -1276,7 +1452,7 @@ Example:
     moosh module-config get dropbox dropbox_secret ?
 
 module-manage
-----------------
+-------------
 
 Show or Hide moudles, system wide (Will also delete, in the future)
 
@@ -1287,6 +1463,7 @@ Example:
 
 
 module-reinstall
+----------------
 
 Re-install any Moodle plugin. It will remove all the data related to the module and install it from clean.
 
@@ -1297,6 +1474,7 @@ Example:
 
 
 nagios-check
+------------
 
 Create session login and login to a site using curl. Return error in Nagios format if login was not successful. 
 
@@ -1304,7 +1482,7 @@ Create session login and login to a site using curl. Return error in Nagios form
 
 
 php-eval
-----------------
+--------
 
 Evaluate arbitrary php code after bootstrapping Moodle.
 
@@ -1314,7 +1492,7 @@ Example:
 
 
 plugin-install
-----------------
+--------------
 
 Download and install plugin. Requires plugin short name, and optional version. You can obtain those data by using `plugin-list -v' command.
 
@@ -1322,13 +1500,13 @@ Example 1: install a specific version
 
     moosh plugin-install --release 20160101 mod_quickmail
 
-Example 2: install the latest release supported by current moodle version
+Example 2: install the latest release supported by current Moodle version.
 
     moosh plugin-install block_checklist
 
 
 plugin-list
-----------------
+-----------
 
 List Moodle plugins filtered on given query. Returns plugin full name, short name, available Moodle versions and short description.
 
@@ -1341,7 +1519,7 @@ Example 2: download all modules available for version 2.8 or later
     moosh plugin-list  | grep '^mod_' | grep 2.8 | grep -o '[^,]*$' | wget -i -
 
 plugins-usage
-----------------
+-------------
 
 Shows the usage of the subset of the plugins used in Moodle installation. 
 Plugin will show the usages, wherever it can figure out if the plugin is used. 
@@ -1368,13 +1546,29 @@ Example:
     moosh plugin-uninstall theme_elegance
 
 question-import
-----------------
+---------------
 
 Import quiz question from xml file into selected quiz.
 
 Example: import question from file path/to/question.xml to quiz with id 2
 
     moosh question-import path/to/question.xml 2
+
+questioncategory-create
+-----------------------
+
+Creates a 'name' question category in a parent category with
+context. The --reuse option creates the category
+if and only if there is not exactly one already in existence with the
+same parent, context and name, returning the existing category id, otherwise.
+
+Other options are idnumber and infoformat, which defaults to
+FORMAT_MARKDOWN.
+
+Example: create a question category, 'noclass' in parent category 6044, with
+context 754 and info 'New Year'. 
+
+     moosh questioncategory-create --reuse -p 6044 -c 754 -d 'New Year' noclass
 
 random-label
 ------------
@@ -1394,14 +1588,14 @@ report-concurrency
 
 Get information about concurrent users online.
 
-Use: -f and -t with date in either YYYYMMDD or YYYY-MM-DD date. Add -p te specify period.
+Use: -f and -t with date in either YYYYMMDD or YYYY-MM-DD date. Add -p to specify period.
 
 Example 1: Get concurrent users between 20-01-2014 and 27-01-2014 with 30 minut periods.
 
     moosh report-concurrency -f 20140120 -t 20140127 -p 30
 
 restore-settings
-------------------
+----------------
 
 Returns all possible restore settings for the current Moodle. To figure them out,
 the command creates and then backes up an empty course with short name "moosh001" - unless it already exists.
@@ -1433,8 +1627,30 @@ Example 2: Delete role id 10.
     moosh role-delete -i 10
 
 
+role-list
+---------
+
+Get list of roles
+
+Example 1: Get roles with id, shortname and name.
+
+    moosh role-list
+
+Result:
+
+    |   ID |Shortname                      |Name                           |
+    |    1 |manager                        | Manager                       |
+    |    2 |coursecreator                  | Course creator                |
+    |    3 |editingteacher                 | Teacher                       |
+    |    4 |teacher                        | Non-editing teacher           |
+    |    5 |student                        | Student                       |
+    |    6 |guest                          | Guest                         |
+    |    7 |user                           | Authenticated user            |
+    |    8 |frontpage                      |                               |
+
+
 role-reset
------------
+----------
 
 Reset give role's permissions from the file.
 
@@ -1476,7 +1692,7 @@ Example 2: Prevent "manager" role to be set on course level
 sql-cli
 -------
 
-Open a connection to the Moodle DB using credentials in config.php. Currently supports PostgreSQL and MySQL.
+Open a connection to the Moodle DB using credentials in config.php. Currently supports PostgreSQL, Cockroachdb, and MySQL.
 
 Example:
 
@@ -1484,9 +1700,9 @@ Example:
 
 
 sql-dump
--------
+--------
 
-Dump Moodle DB to sql file. Works for PostgreSQL and MySQL.
+Dump Moodle DB to sql file. Works for PostgreSQL, Cockroachdb, and MySQL.
 
 Example 1: dump database to backup.sql file
 
@@ -1516,7 +1732,7 @@ Example:
     moosh theme-info
 
 theme-settings-export
-----------
+---------------------
 
 Export theme settings (including uploaded files) as a tar.gz for use with `theme-settings-import`.
 
@@ -1524,12 +1740,12 @@ Example 1: run within a theme directory and it will know which theme you want
 
     moosh theme-settings-export
 
-Example 2: run it anywhere within the moodle dir if you specify the theme name
+Example 2: run it anywhere within the Moodle dir if you specify the theme name
 
     moosh theme-settings-export --themename boost
 
 theme-settings-import
-----------
+---------------------
 
 Import settings from file created with `theme-settings-export`.
 
@@ -1540,6 +1756,29 @@ Example 1: give the name of the exported file
 Example 2: specify a target theme name if you want to transfer settings to a different (but compatible) theme
 
     moosh theme-settings-import --targettheme boostfork boost_settings_1558197087.tar.gz
+
+top
+---
+
+Display the latest entries from the log table mdl_logstore_standard_log.
+If combined with "watch" command, it will imitate the poor man's "top" utility.
+
+Example:
+
+    watch moosh top
+ 
+user-assign-system-role
+-----------------------
+
+Assign system role to user.
+
+Example 1: assign "manager" role for "testuser"
+    
+    moosh user-assign-system-role testuser manager
+    
+Example 1: assign "coursecreator" role for "testuser2"
+    
+    moosh user-assign-system-role testuser2 coursecreator
 
 user-create
 -----------
@@ -1592,7 +1831,7 @@ user-getidbyname
 This command has been deprecated. Use user-list instead.
 
 user-import-pictures
---------
+--------------------
 
 Provides capability of importing user pictures from a specific directory (recursively including subdirectories). 
 Image filename can be mapped to user ID, idnumber or username database field. Supported image types are jpg, gif and png.
@@ -1611,7 +1850,7 @@ Example 3: import user pictures from directory and map file names to user's user
     moosh user-import-pictures -u /path/to/import/dir
 
 user-list
---------
+---------
 
 List user accounts. It accepts sql WHERE clause. If run without sql argument it will list first 100 users from database.
 
@@ -1631,7 +1870,24 @@ Example 4: list teachers enrolled in course id 2 that never accessed that course
 
     moosh user-list --course 2 --course-role editingteacher --course-inactive
 
+user-login
+----------
 
+Logs given user in and return the session cookie.
+This can then be used in another HTTP call to impersonate that user. 
+It is important that you run moosh as correct www user.
+If you run it as another user than your web server, then the server may not be able 
+to read session file and you will see the error: 
+
+    error/An error occurred whilst communicating with the server 
+
+Example: login as student1 and fetch his dashboard page.
+
+    $ moosh.php user-login student1
+    MoodleSession:h6v2l11946ne16tejogs55vhcn
+    $ curl -b 'MoodleSession=h6v2l11946ne16tejogs55vhcn' http://localhost/vanilla37/my/index.php
+    
+    
 user-mod
 --------
 
@@ -1660,6 +1916,38 @@ Example 5: set user as global super user
 Example 6: change admin's password while ignoring password's policy
 
     moosh user-mod --ignorepolicy --password weakpassword admin
+
+user-unassign-system-role
+-------------------------
+
+Unassign system role to user.
+
+Example 1: unassign "manager" role for "testuser"
+    
+    moosh user-unassign-system-role testuser manager
+    
+Example 1: unassign "coursecreator" role for "testuser2"
+    
+    moosh user-unassign-system-role testuser2 coursecreator
+
+userprofilefields-export
+------------------------
+
+Export the definition of the defined user profile fields to CSV file
+named by default "user_profile_fields.csv".
+
+Example:
+
+    moosh userprofilefields-export
+
+userprofilefields-import
+------------------------
+
+Import user profile fields defined in given CSV file.
+
+Example: import user profie fields from user_profile_fields.csv
+ 
+    moosh userprofilefields-import user_profile_fields.csv
 
 webservice-call
 ---------------

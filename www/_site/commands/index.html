@@ -130,10 +130,8 @@ See <a href="https://moodle.org/mod/forum/discuss.php?d=368091">Moodle forum pos
 
 <p>Example 7. Add quiz named "moosh test quiz" with intro set to "Here is your quiz", and activity completion options enabled to course 33</p>
 
-<pre><code>moosh activity-add 'moosh test quiz' -o="--intro=\"Here is your quiz.\  --completion=2 --completionview=1 --complet
+<pre><code>moosh activity-add -n 'moosh test quiz' -o="--intro=Here is your quiz.  --completion=2 --completionview=1 --completionusegrade=1 --completionpass=1" quiz 33
 </code></pre>
-
-<p>ionusegrade=1 --completionpass=1" quiz 33</p>
 
 <a name="activity-delete"></a>
 <h2>activity-delete</h2>
@@ -202,9 +200,9 @@ See <a href="https://moodle.org/mod/forum/discuss.php?d=368091">Moodle forum pos
 <a name="apache-parse-missing-files"></a>
 <h2>apache-parse-missing-files</h2>
 
-<p>Looks for missing files in apache log when moodle files are accessed and reports them</p>
+<p>Looks through apache access log for potentially missing files.</p>
 
-<p>Example 1. Parse file <code>apache.log</code> and search for missing files</p>
+<p>Example 1. Parse file <code>apache.log</code> and search for missing files.</p>
 
 <pre><code>moosh apache-parse-missing-files apache.log
 </code></pre>
@@ -318,6 +316,38 @@ CREATE TABLE perflog (
 <p>Example 2. Move up Email-based self-registration (email).</p>
 
 <pre><code>moosh auth-manage up email 
+</code></pre>
+
+<a name="backup-info"></a>
+<h2>backup-info</h2>
+
+<p>Provides some basic information about Moodle backup file.
+The command works by extracting files like users.xml, gradebook.xml, course/logs.xml and getting the information from them</p>
+
+<p>Example 1. Display basic stats about backup-moodle2-course-2-course1-20200405-1947.mbz file.</p>
+
+<pre><code>moosh backup-info backup-moodle2-course-2-course1-20200405-1947.mbz
+</code></pre>
+
+<a name="base-path"></a>
+<h2>base-path</h2>
+
+<p>For a given path/file inside Moodle plugin, the command returns initial directories that are a base directory for that plugin.
+The path can be provided as a single argument or read from standard input.</p>
+
+<p>Example 1. Displays mod/choice.</p>
+
+<pre><code>moosh base-path mod/choice/index.php
+</code></pre>
+
+<p>Example 2. Displays theme/boost.</p>
+
+<pre><code>moosh base-path theme/boost/pix/mod/quiz/whitecircle.png
+</code></pre>
+
+<p>Example 3. Like above but using stdin.</p>
+
+<pre><code>echo theme/boost/pix/mod/quiz/whitecircle.png | moosh base-path
 </code></pre>
 
 <a name="block-add"></a>
@@ -471,6 +501,26 @@ moosh category-create -r CategoryABC
 <pre><code>moosh category-move 3 0
 </code></pre>
 
+<a name="category-resortcourses"></a>
+<h2>category-resortcourses</h2>
+
+<p>Sort courses and/or categories by fullname, shortname or idnumber.</p>
+
+<p>Example 1: Sort courses in category id 1 by idnumber.</p>
+
+<pre><code>moosh category-resortcourses 1 idnumber
+</code></pre>
+
+<p>Example 2: Sort courses and categories by shortname in category id 1 and all sub-categories below.</p>
+
+<pre><code>moosh category-resortcourses -r 1 shortname
+</code></pre>
+
+<p>Example 3: Sort courses by fullname in category id 1 and all sub-categories below. Do not change the ordering of categories.</p>
+
+<pre><code>moosh category-resortcourses -n -r 1 fullname
+</code></pre>
+
 <a name="chkdatadir"></a>
 <h2>chkdatadir</h2>
 
@@ -485,7 +535,7 @@ You usually want to run the check as the same user that runs web server.</p>
 <a name="code-check"></a>
 <h2>code-check</h2>
 
-<p>Checks files if they are compatible with moodle code standards</p>
+<p>Run Moodle code checker against the files.</p>
 
 <p>Example 1:</p>
 
@@ -724,6 +774,22 @@ Use -i for providing username IDs.  Optionally add -S and -E to define start and
 <pre><code>moosh course-enableselfenrol --key "an example enrolment key" 3
 </code></pre>
 
+<a name="course-info"></a>
+<h2>course-info</h2>
+
+<p>Shows basic information about given course ID.
+This command will also clear course cache, to measure how much time the cache rebuild takes.</p>
+
+<p>Example 1: Show statistics for course ID 2.</p>
+
+<pre><code>moosh course-info 2  
+</code></pre>
+
+<p>Example 2: Show statistics for course ID 2 - display in CSV format.</p>
+
+<pre><code>moosh course-info -c 2  
+</code></pre>
+
 <a name="course-list"></a>
 <h2>course-list</h2>
 
@@ -846,6 +912,16 @@ There are also quite a few options that modify the behaviour - see <code>moosh c
 <pre><code>moosh course-restore -e backup.mbz 3
 </code></pre>
 
+<p>Example 3: Ignore pre-check warnings, like restoring backup from higher Moodle version.</p>
+
+<pre><code>moosh course-restore --ignore-warnings backup.mbz 1
+</code></pre>
+
+<p>Example 4: Restore backup.mbz into existing course with id=3, overwrite course content.</p>
+
+<pre><code>moosh course-restore --overwrite backup.mbz 3
+</code></pre>
+
 <a name="course-unenrol"></a>
 <h2>course-unenrol</h2>
 
@@ -859,9 +935,26 @@ There are also quite a few options that modify the behaviour - see <code>moosh c
 <a name="data-stats"></a>
 <h2>data-stats</h2>
 
-<p>Provides information on size of dataroot directory, dataroot/filedir subdirectory and total size of non-external files in moodle. Outpus data in json format when run using --json option.</p>
+<p>Provides information on size of dataroot directory, dataroot/filedir subdirectory and total size of non-external files in Moodle.
+Outputs data in json format when run using --json option.</p>
 
 <pre><code>moosh data-stats
+</code></pre>
+
+<a name="db-stats"></a>
+<h2>db-stats</h2>
+
+<p>Shows the total size of the Moodle database and the biggest tables.
+With -H or -j options the sizes will be shown in bytes (ie "286720" instead of "280KB").</p>
+
+<p>Example 1: Show me basic database statistics, formatted for human consumption.</p>
+
+<pre><code>moosh db-stats
+</code></pre>
+
+<p>Example 2: Database statistics in JSON format.</p>
+
+<pre><code>moosh db-stats -j
 </code></pre>
 
 <a name="debug-off"></a>
@@ -878,6 +971,35 @@ There are also quite a few options that modify the behaviour - see <code>moosh c
 <p>Turns on full debug - all the options in debugging section of the settings plus enables theme designer mode.</p>
 
 <pre><code>moosh debug-on
+</code></pre>
+
+<a name="delete-missingplugins"></a>
+<h2>delete-missingplugins</h2>
+
+<p>Uninstalls all plugins that are "missing" (PLUGIN_STATUS_MISSING) - meaning there is no source code for them.
+Running this command will delete database tables - destroying any data that may have been stored in plugin.</p>
+
+<pre><code>moosh delete-missingplugins
+</code></pre>
+
+<a name="dev-langusage"></a>
+<h2>dev-langusage</h2>
+
+<p>The command parses PHP file given as an argument. If the argument points to directory,
+then all the .php files inside it ae parsed.
+A parser will look for the use of language strings, that is calls to get_string(), print_string(), string_for_js().
+It then checks if the string is known by the string_manager - that is, if the sting is listed in the lang file.
+With -l / --lang flag you may include and check against any lang file.</p>
+
+<p>Example 1: Check if strings used in mod/book exist in the lang file.
+Show only the ones missing (if any).</p>
+
+<pre><code>moosh dev-langusage mod/book | grep missing
+</code></pre>
+
+<p>Example 2: Check if "mod_book" component strings used in mod/book are defined in the lang file.</p>
+
+<pre><code>moosh dev-langusage -c mod_book mod/book
 </code></pre>
 
 <a name="dev-versionbump"></a>
@@ -922,6 +1044,24 @@ moosh dev-versionbump
 <pre><code>moosh event-list
 </code></pre>
 
+<a name="file-check"></a>
+<h2>file-check</h2>
+
+<p>For each file entry in the database, check that the file exists in moodledata (in filedir).
+With --stop <number> stop the search after number of missing files found.</p>
+
+<p>Example:</p>
+
+<pre><code>moosh file-check -s 1
+</code></pre>
+
+<p>Result:</p>
+
+<pre><code>Missing /opt/data/filedir/5f/8e/5f8e911d0da441e36f47c5c46f4393269211ca56
+assignfeedback_editpdf / stamps "smile.png" 2019-08-25 15:43 / 2019-08-25 15:43
+Found 1 missing files, not searching anymore. Set -s 0 option to disable the limit.
+</code></pre>
+
 <a name="file-datacheck"></a>
 <h2>file-datacheck</h2>
 
@@ -933,7 +1073,8 @@ moosh dev-versionbump
 <a name="file-dbcheck"></a>
 <h2>file-dbcheck</h2>
 
-<p>Check that all files recorder in the DB do exist in Moodle data directory.</p>
+<p>For each file in moodledata, check that there is an entry in the Moodle DB.
+This command will find any extra files in "filedir".</p>
 
 <pre><code>moosh file-dbcheck
 </code></pre>
@@ -963,6 +1104,23 @@ moosh dev-versionbump
 
 <pre><code>moosh file-list -i 'component="backup" AND filearea="automated"' | moosh file-delete -s
 moosh file-delete --flush
+</code></pre>
+
+<a name="file-hash-delete"></a>
+<h2>file-hash-delete</h2>
+
+<p>Delete files that match given hash from the dababase (mdl_files).</p>
+
+<p>Example:</p>
+
+<pre><code>moosh file-hash-delete 5f8e911d0da441e36f47c5c46f4393269211ca56
+</code></pre>
+
+<p>Resuls:</p>
+
+<pre><code>There is: 1 results of this hash. 
+Successfully deleted files.
+File ID: 1, contenthash: 5f8e911d0da441e36f47c5c46f4393269211ca56, itemid: 0, component: assignfeedback_editpdf, filearea: stamps, filename: smile.png
 </code></pre>
 
 <a name="file-list"></a>
@@ -1441,6 +1599,16 @@ necessary.</p>
 <pre><code>moosh info
 </code></pre>
 
+<a name="info-context"></a>
+<h2>info-context</h2>
+
+<p>Show information about given context ID - as in mdl_context.id.</p>
+
+<p>Example 1: Show information about Moodle context 123.</p>
+
+<pre><code>moosh info-context 123
+</code></pre>
+
 <a name="info-plugins"></a>
 <h2>info-plugins</h2>
 
@@ -1449,6 +1617,32 @@ necessary.</p>
 <p>Example 1: Show all plugin types.</p>
 
 <pre><code>moosh info-plugins
+</code></pre>
+
+<a name="lang-compare"></a>
+<h2>lang-compare</h2>
+
+<p>Compare 2 Moodle language files and lists the difference in strings (keys) between them.
+It does not compare the translations (values).</p>
+
+<p>Example:</p>
+
+<pre><code>moosh.php lang-compare book.php book2.php
+</code></pre>
+
+<p>Result:</p>
+
+<pre><code>Comparing book.php and book2.php. Summary:
+Number of strings in book.php: 72
+Number of strings in book2.php: 72
+Number of strings missing in book2.php: 1
+Number of strings missing in book.php: 1
+
+List of language strings that exist in book.php but are not present in book2.php
+pluginname
+
+List of language strings that exist in book2.php but are not present in book.php
+pluginname2
 </code></pre>
 
 <a name="languages-update"></a>
@@ -1504,7 +1698,8 @@ moosh module-config get dropbox dropbox_secret ?
 moosh module-manage show scorm
 </code></pre>
 
-<p>module-reinstall</p>
+<a name="module-reinstall"></a>
+<h2>module-reinstall</h2>
 
 <p>Re-install any Moodle plugin. It will remove all the data related to the module and install it from clean.</p>
 
@@ -1514,7 +1709,8 @@ moosh module-manage show scorm
 moosh module-reinstall mod_book
 </code></pre>
 
-<p>nagios-check</p>
+<a name="nagios-check"></a>
+<h2>nagios-check</h2>
 
 <p>Create session login and login to a site using curl. Return error in Nagios format if login was not successful.</p>
 
@@ -1541,7 +1737,7 @@ moosh module-reinstall mod_book
 <pre><code>moosh plugin-install --release 20160101 mod_quickmail
 </code></pre>
 
-<p>Example 2: install the latest release supported by current moodle version</p>
+<p>Example 2: install the latest release supported by current Moodle version.</p>
 
 <pre><code>moosh plugin-install block_checklist
 </code></pre>
@@ -1600,6 +1796,23 @@ If you do not have write permissions on the plugins' folder it will advice you w
 <pre><code>moosh question-import path/to/question.xml 2
 </code></pre>
 
+<a name="questioncategory-create"></a>
+<h2>questioncategory-create</h2>
+
+<p>Creates a 'name' question category in a parent category with
+context. The --reuse option creates the category
+if and only if there is not exactly one already in existence with the
+same parent, context and name, returning the existing category id, otherwise.</p>
+
+<p>Other options are idnumber and infoformat, which defaults to
+FORMAT_MARKDOWN.</p>
+
+<p>Example: create a question category, 'noclass' in parent category 6044, with
+context 754 and info 'New Year'.</p>
+
+<pre><code> moosh questioncategory-create --reuse -p 6044 -c 754 -d 'New Year' noclass
+</code></pre>
+
 <a name="random-label"></a>
 <h2>random-label</h2>
 
@@ -1620,7 +1833,7 @@ If you do not have write permissions on the plugins' folder it will advice you w
 
 <p>Get information about concurrent users online.</p>
 
-<p>Use: -f and -t with date in either YYYYMMDD or YYYY-MM-DD date. Add -p te specify period.</p>
+<p>Use: -f and -t with date in either YYYYMMDD or YYYY-MM-DD date. Add -p to specify period.</p>
 
 <p>Example 1: Get concurrent users between 20-01-2014 and 27-01-2014 with 30 minut periods.</p>
 
@@ -1661,6 +1874,29 @@ the command creates and then backes up an empty course with short name "moosh001
 <p>Example 2: Delete role id 10.</p>
 
 <pre><code>moosh role-delete -i 10
+</code></pre>
+
+<a name="role-list"></a>
+<h2>role-list</h2>
+
+<p>Get list of roles</p>
+
+<p>Example 1: Get roles with id, shortname and name.</p>
+
+<pre><code>moosh role-list
+</code></pre>
+
+<p>Result:</p>
+
+<pre><code>|   ID |Shortname                      |Name                           |
+|    1 |manager                        | Manager                       |
+|    2 |coursecreator                  | Course creator                |
+|    3 |editingteacher                 | Teacher                       |
+|    4 |teacher                        | Non-editing teacher           |
+|    5 |student                        | Student                       |
+|    6 |guest                          | Guest                         |
+|    7 |user                           | Authenticated user            |
+|    8 |frontpage                      |                               |
 </code></pre>
 
 <a name="role-reset"></a>
@@ -1710,7 +1946,7 @@ and add "-on" or "-off" to the caontext level name to turn it on or off.</p>
 <a name="sql-cli"></a>
 <h2>sql-cli</h2>
 
-<p>Open a connection to the Moodle DB using credentials in config.php. Currently supports PostgreSQL and MySQL.</p>
+<p>Open a connection to the Moodle DB using credentials in config.php. Currently supports PostgreSQL, Cockroachdb, and MySQL.</p>
 
 <p>Example:</p>
 
@@ -1720,7 +1956,7 @@ and add "-on" or "-off" to the caontext level name to turn it on or off.</p>
 <a name="sql-dump"></a>
 <h2>sql-dump</h2>
 
-<p>Dump Moodle DB to sql file. Works for PostgreSQL and MySQL.</p>
+<p>Dump Moodle DB to sql file. Works for PostgreSQL, Cockroachdb, and MySQL.</p>
 
 <p>Example 1: dump database to backup.sql file</p>
 
@@ -1762,7 +1998,7 @@ and add "-on" or "-off" to the caontext level name to turn it on or off.</p>
 <pre><code>moosh theme-settings-export
 </code></pre>
 
-<p>Example 2: run it anywhere within the moodle dir if you specify the theme name</p>
+<p>Example 2: run it anywhere within the Moodle dir if you specify the theme name</p>
 
 <pre><code>moosh theme-settings-export --themename boost
 </code></pre>
@@ -1780,6 +2016,32 @@ and add "-on" or "-off" to the caontext level name to turn it on or off.</p>
 <p>Example 2: specify a target theme name if you want to transfer settings to a different (but compatible) theme</p>
 
 <pre><code>moosh theme-settings-import --targettheme boostfork boost_settings_1558197087.tar.gz
+</code></pre>
+
+<a name="top"></a>
+<h2>top</h2>
+
+<p>Display the latest entries from the log table mdl_logstore_standard_log.
+If combined with "watch" command, it will imitate the poor man's "top" utility.</p>
+
+<p>Example:</p>
+
+<pre><code>watch moosh top
+</code></pre>
+
+<a name="user-assign-system-role"></a>
+<h2>user-assign-system-role</h2>
+
+<p>Assign system role to user.</p>
+
+<p>Example 1: assign "manager" role for "testuser"</p>
+
+<pre><code>moosh user-assign-system-role testuser manager
+</code></pre>
+
+<p>Example 1: assign "coursecreator" role for "testuser2"</p>
+
+<pre><code>moosh user-assign-system-role testuser2 coursecreator
 </code></pre>
 
 <a name="user-create"></a>
@@ -1886,6 +2148,25 @@ Image filename can be mapped to user ID, idnumber or username database field. Su
 <pre><code>moosh user-list --course 2 --course-role editingteacher --course-inactive
 </code></pre>
 
+<a name="user-login"></a>
+<h2>user-login</h2>
+
+<p>Logs given user in and return the session cookie.
+This can then be used in another HTTP call to impersonate that user.
+It is important that you run moosh as correct www user.
+If you run it as another user than your web server, then the server may not be able
+to read session file and you will see the error:</p>
+
+<pre><code>error/An error occurred whilst communicating with the server 
+</code></pre>
+
+<p>Example: login as student1 and fetch his dashboard page.</p>
+
+<pre><code>$ moosh.php user-login student1
+MoodleSession:h6v2l11946ne16tejogs55vhcn
+$ curl -b 'MoodleSession=h6v2l11946ne16tejogs55vhcn' http://localhost/vanilla37/my/index.php
+</code></pre>
+
 <a name="user-mod"></a>
 <h2>user-mod</h2>
 
@@ -1921,6 +2202,42 @@ Image filename can be mapped to user ID, idnumber or username database field. Su
 <pre><code>moosh user-mod --ignorepolicy --password weakpassword admin
 </code></pre>
 
+<a name="user-unassign-system-role"></a>
+<h2>user-unassign-system-role</h2>
+
+<p>Unassign system role to user.</p>
+
+<p>Example 1: unassign "manager" role for "testuser"</p>
+
+<pre><code>moosh user-unassign-system-role testuser manager
+</code></pre>
+
+<p>Example 1: unassign "coursecreator" role for "testuser2"</p>
+
+<pre><code>moosh user-unassign-system-role testuser2 coursecreator
+</code></pre>
+
+<a name="userprofilefields-export"></a>
+<h2>userprofilefields-export</h2>
+
+<p>Export the definition of the defined user profile fields to CSV file
+named by default "user_profile_fields.csv".</p>
+
+<p>Example:</p>
+
+<pre><code>moosh userprofilefields-export
+</code></pre>
+
+<a name="userprofilefields-import"></a>
+<h2>userprofilefields-import</h2>
+
+<p>Import user profile fields defined in given CSV file.</p>
+
+<p>Example: import user profie fields from user_profile_fields.csv</p>
+
+<pre><code>moosh userprofilefields-import user_profile_fields.csv
+</code></pre>
+
 <a name="webservice-call"></a>
 <h2>webservice-call</h2>
 
@@ -1938,12 +2255,12 @@ Image filename can be mapped to user ID, idnumber or username database field. Su
           <div class="bs-sidebar hidden-print">
             <ul class="nav bs-sidenav accordion">
             <li></li>
-                <p>Moodle development book:</p>
-                <a href="https://leanpub.com/moodle"><img class="img-responsive book above-index" src="/images/book.jpg" /></a>
+
 
                 <h4 class="short-navbar-title">command index</h4>
                 <ol class="short-navbar list-unstyled"></ol>
-             
+                <p>Moodle development book:</p>
+                <a href="https://leanpub.com/moodle"><img class="img-responsive book above-index" src="/images/book.jpg" /></a>
             </ul>
           </div>
         </div>
