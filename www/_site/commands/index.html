@@ -577,6 +577,30 @@ You usually want to run the check as the same user that runs web server.</p>
 <pre><code>moosh cohort-enrol -c 4 "my cohort18"
 </code></pre>
 
+<a name="cohort-enrolfile"></a>
+<h2>cohort-enrolfile</h2>
+
+<p>Add users to cohorts from a CSV file. The vaild fields for the CSV file include: username,
+email, cohortid, cohortname</p>
+
+<p>The CSV must include at least one of username/email and one of cohortid/cohortname. If
+more than one of either category is given, username and cohortid take precedence over the
+other values</p>
+
+<p>Example 1: Add users to specified cohorts from /home/me/testing.csv. If the contents of
+testing.csv are</p>
+
+<pre><code>username,cohortid
+johndoe,1
+janedoe,2
+</code></pre>
+
+<p>then user johndoe is enrolled in cohort id 1, and user janedoe is enrolled in cohort with
+id 2 by:</p>
+
+<pre><code>moosh cohort-enrolfile /home/me/testing.csv
+</code></pre>
+
 <a name="cohort-unenrol"></a>
 <h2>cohort-unenrol</h2>
 
@@ -606,6 +630,33 @@ You usually want to run the check as the same user that runs web server.</p>
 
 <pre><code>moosh config-get core dirroot
 </code></pre>
+
+<a name="config-plugin-export"></a>
+<h2>config-plugin-export</h2>
+
+<p>Exports whole configuration of selected plugin to .xml</p>
+
+<p>Example 1: Export mod_book plugin configuration to Book_config_{timestamp}.xml in current directory.</p>
+
+<pre><code>moosh config-plugin-export book
+</code></pre>
+
+<p>Example 2: Export mod_book plugin configuration to /tmp/plugin/Book_config_{timestamp}.xml</p>
+
+<pre><code>moosh config-plugin-export -o /tmp/plugin/ mod_book
+</code></pre>
+
+<a name="config-plugin-import"></a>
+<h2>config-plugin-import</h2>
+
+<p>Imports configuration of plugin from .xml created by <strong>config-plugin-export</strong></p>
+
+<p>Example 1: Import configuration of plugin mod_book into moodle.</p>
+
+<pre><code>moosh config-plugin-import /tmp/Book_config_1608106580.xml
+</code></pre>
+
+<p>To see changes in Moodle you need to execute <code>moosh cache-clear</code></p>
 
 <a name="config-plugins"></a>
 <h2>config-plugins</h2>
@@ -645,7 +696,7 @@ You usually want to run the check as the same user that runs web server.</p>
 <a name="course-backup"></a>
 <h2>course-backup</h2>
 
-<p>Backup course with provided id.</p>
+<p>Backup course with provided id.  By default, logs and grade histories are excluded.</p>
 
 <p>Example 1: Backup course id=3 into default .mbz file in current directory:</p>
 
@@ -655,6 +706,16 @@ You usually want to run the check as the same user that runs web server.</p>
 <p>Example 2: Backup course id=3 and save it as /tmp/mybackup.mbz:</p>
 
 <pre><code>moosh course-backup -f /tmp/mybackup.mbz 3
+</code></pre>
+
+<p>Example 3: Backup course id=3, including logs and grade histories:</p>
+
+<pre><code>moosh course-backup --fullbackup 3
+</code></pre>
+
+<p>Example 3: Backup course id=3 without any user data (excludes users, logs, grade historyies, role assignments, comments, and filters):</p>
+
+<pre><code>moosh course-backup --template 3
 </code></pre>
 
 <a name="course-cleanup"></a>
@@ -1016,16 +1077,21 @@ moosh dev-versionbump
 <a name="download-moodle"></a>
 <h2>download-moodle</h2>
 
-<p>Download latest Moodle version from the latest branch (default) or previous one if -v given.</p>
+<p>Download latest stable Moodle version (default) or another version -v is provided.</p>
 
-<p>Example 1: Download latest Moodle (as set up in default_options.php).</p>
+<p>Example 1: Download latest Moodle</p>
 
 <pre><code>moosh download-moodle
 </code></pre>
 
-<p>Example 2: Download latest Moodle 2.3.</p>
+<p>Example 2: Download latest Moodle 3.10.</p>
 
-<pre><code>    moosh download-moodle -v 2.3
+<pre><code>moosh download-moodle -v 3.10
+</code></pre>
+
+<p>Example 2: Download Moodle 3.5.15.</p>
+
+<pre><code>moosh download-moodle -v 3.5.15
 </code></pre>
 
 <a name="event-fire"></a>
@@ -1687,6 +1753,27 @@ pluginname2
 moosh module-config get dropbox dropbox_secret ?
 </code></pre>
 
+<a name="module-config"></a>
+<h2>module-config</h2>
+
+<p>Copy a module from one course to another.</p>
+
+<p>Example 1: Copy module id 27 to course id 34.</p>
+
+<pre><code>moosh module-copy 27 34
+</code></pre>
+
+<p>Example 2: Copy module id 27 to course id 34 and name the new module "Assignment 1".</p>
+
+<pre><code>moosh module-copy --name "Assignment 1" 27 34
+</code></pre>
+
+<p>Example 3: Copy module id 27 to course id 34 and name the new module "Assignment 1",
+placing it in section 2.</p>
+
+<pre><code>moosh module-copy --name "Assignment 1" --section 2 27 34
+</code></pre>
+
 <a name="module-manage"></a>
 <h2>module-manage</h2>
 
@@ -1725,6 +1812,28 @@ moosh module-reinstall mod_book
 <p>Example:</p>
 
 <pre><code>moosh php-eval 'var_dump(get_object_vars($CFG))'
+</code></pre>
+
+<a name="plugin-download"></a>
+<h2>plugin-download</h2>
+
+<p>Download plugin for a given Moodle version to current directory.
+Requires plugin short name, and optional Moodle version.
+You can obtain avalible plugins names by using `plugin-list -n' command</p>
+
+<p>Example 1: Download block_fastnav for moodle 3.9 into ./block_fastnav.zip</p>
+
+<pre><code>moosh plugin-download -v 3.9 block_fastnav
+</code></pre>
+
+<p>Example 2: Only show link for block_fastnav moodle current version</p>
+
+<pre><code>moosh plugin-download -u block_fastnav
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>https://moodle.org/plugins/download.php/23108/block_fastnav_moodle310_2020120800.zip
 </code></pre>
 
 <a name="plugin-install"></a>
@@ -1813,6 +1922,25 @@ context 754 and info 'New Year'.</p>
 <pre><code> moosh questioncategory-create --reuse -p 6044 -c 754 -d 'New Year' noclass
 </code></pre>
 
+<a name="quiz-delete-attempts"></a>
+<h2>quiz-delete-attempts</h2>
+
+<p>Deletes all quiz-attempts with given quiz id.</p>
+
+<p>Example 1: delete all attempts from quiz id 2.</p>
+
+<pre><code>moosh quiz-delete-attempts 2
+</code></pre>
+
+<p>Resuls:</p>
+
+<pre><code>Deleted attempt: 15
+Deleted attempt: 16
+Deleted attempt: 17
+Deleted attempt: 18
+Deleted 4 questions
+</code></pre>
+
 <a name="random-label"></a>
 <h2>random-label</h2>
 
@@ -1838,6 +1966,11 @@ context 754 and info 'New Year'.</p>
 <p>Example 1: Get concurrent users between 20-01-2014 and 27-01-2014 with 30 minut periods.</p>
 
 <pre><code>moosh report-concurrency -f 20140120 -t 20140127 -p 30
+</code></pre>
+
+<p>Example 2: Create the report for the last week. Could be used in a cronjob.</p>
+
+<pre><code>start=$(date --date="7 days ago" +"%Y-%m-%d");finish=$(date +"%Y-%m-%d");moosh report-concurrency --from $start --to $finish
 </code></pre>
 
 <a name="restore-settings"></a>
@@ -1917,12 +2050,12 @@ and finally, "contextid" (where 1 is system wide)</p>
 
 <p>Example 1: update "student" role (roleid=5) "mod/forumng:grade" capability, system wide (contextid=1)</p>
 
-<pre><code>moosh student mod/forumng:grade allow 1
+<pre><code>moosh role-update-capability student mod/forumng:grade allow 1
 </code></pre>
 
 <p>Example 2: update "editingteacher" role (roleid=3) "mod/forumng:grade" capability, system wide (contextid=1)</p>
 
-<pre><code>moosh -i 3 mod/forumng:grade prevent 1
+<pre><code>moosh role-update-capability -i 3 mod/forumng:grade prevent 1
 </code></pre>
 
 <a name="role-update-contextlevel"></a>
@@ -1935,12 +2068,32 @@ and add "-on" or "-off" to the caontext level name to turn it on or off.</p>
 
 <p>Example 1: Allow "student" role to be set on block level</p>
 
-<pre><code>moosh student -block-on
+<pre><code>moosh role-update-contextlevel student -block-on
 </code></pre>
 
 <p>Example 2: Prevent "manager" role to be set on course level</p>
 
-<pre><code>moosh manager -course-off
+<pre><code>moosh role-update-contextlevel manager -course-off
+</code></pre>
+
+<a name="section-config-set"></a>
+<h2>section-config-set</h2>
+
+<p>Follows the course-config-set pattern, updating a field in the Moodle {course_sections} table, for all the course sections (or optionally a single section), in all the courses in a course category, or alternatively in one course.</p>
+
+<p>Example 1: set the name of the second section in course with id 45 to "Describe a picture"</p>
+
+<pre><code>moosh section-config-set -s 2 course 45 name "Describe a picture"
+</code></pre>
+
+<p>Example 2: set summaryformat to markdown in all sections in courses in the Miscellaneous category</p>
+
+<pre><code>moosh section-config-set category 1 summaryformat 4
+</code></pre>
+
+<p>Example 3: Hide all sections in course with id 45</p>
+
+<pre><code>moosh section-config-set course 45 visible 0
 </code></pre>
 
 <a name="sql-cli"></a>
@@ -2056,7 +2209,7 @@ If combined with "watch" command, it will imitate the poor man's "top" utility.<
 
 <p>Example 2: create user "testuser" with the all the optional values</p>
 
-<pre><code>moosh user-create --password pass --email me@example.com --digest 2 --city Szczecin --country PL --firstname "first name" --lastname name testuser
+<pre><code>moosh user-create --password pass --email me@example.com --digest 2 --city Szczecin --country PL --institution "State University" --department "Technology" --firstname "first name" --lastname name testuser
 </code></pre>
 
 <p>Example 3: use bash/zsh expansion to create 10 users</p>
